@@ -13,7 +13,7 @@ public class ZipTools implements IHelperPlugin{
         this.pluginHelper = callbacks.getPluginHelper();
         callbacks.setHelperPluginName("zip-tools");
         callbacks.setHelperPluginAutor("woodpecker-org");
-        callbacks.setHelperPluginVersion("0.1.0");
+        callbacks.setHelperPluginVersion("0.1.1");
         List<IHelper> helperPluginList = new ArrayList<IHelper>();
         helperPluginList.add(new ZipSlip());
         helperPluginList.add(new UnzipTest());
