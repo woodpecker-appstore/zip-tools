@@ -12,6 +12,8 @@
 
 ![](./docs/zip-slip.png)
 
+![](./docs/evil-zip.png)
+
 测试解压效果，验证是否生效
 
 ![](./docs/unzip-test.png)
