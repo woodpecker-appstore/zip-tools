@@ -2,10 +2,7 @@ package me.gv7.woodpecker.plugin;
 
 import me.gv7.woodpecker.tools.common.FileUtil;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -50,8 +47,8 @@ public class ZipSlip implements IHelper{
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(saveFile));
         zipOutputStream.setLevel(Deflater.BEST_COMPRESSION);
         for(Map.Entry<String,String> un:unm.entrySet()){
-            String filePath = un.getKey();
-            String compressName = un.getValue();
+            String compressName = un.getKey();
+            String filePath = un.getValue();
             zipOutputStream.putNextEntry(new ZipEntry(compressName));
             zipOutputStream.write(FileUtil.readFile(filePath));
             zipOutputStream.flush();
@@ -63,14 +60,12 @@ public class ZipSlip implements IHelper{
 
     public void doHelp(Map<String, Object> customArgs, IResultOutput resultOutput) throws Throwable {
         this.resultOutput = resultOutput;
-        Map<String,String> cus = new HashMap<String, String>();
-        for(Map.Entry<String,Object> arg:customArgs.entrySet()){
-            String key = arg.getKey();
-            String compress_file = (String)arg.getValue();
-            if(key.startsWith("compress_file_")){
-                String id = key.substring("compress_file_".length(),key.length());
-                String uncompress = (String)customArgs.get(String.format("compress_name_%s",id));
-                cus.put(compress_file,uncompress);
+        LinkedHashMap<String,String> cus = new LinkedHashMap<String, String>();
+        for(int i= 0;i<customArgs.size();i++){
+            String cFileName = String.format("compress_name_%s",i+1);
+            String cFile = String.format("compress_file_%s",i+1);
+            if(customArgs.get(cFileName) != null && customArgs.get(cFile) != null){
+                cus.put((String)customArgs.get(cFileName),(String)customArgs.get(cFile));
             }
         }
 
